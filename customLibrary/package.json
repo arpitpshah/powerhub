@@ -1,0 +1,17 @@
+{
+  "name": "powerdatautils",
+  "version": "2.0.11",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Arpit Shah",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  },
+  "files": [
+    "dist"
+  ]
+}

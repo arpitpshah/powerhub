@@ -1,0 +1,66 @@
+service: PowerHub2-lambda-project
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: dev
+  region: us-east-1
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:BatchWriteItem
+        - dynamodb:PutItem
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:Query
+      Resource: 
+        - "arn:aws:dynamodb:us-east-1:837919273423:table/energyConsumption"
+        - "arn:aws:dynamodb:us-east-1:837919273423:table/userInfo"
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:PutObjectAcl
+      Resource: "arn:aws:s3:::powerhubbucket"
+    - Effect: Allow
+      Action:
+        - sqs:ReceiveMessage
+        - sqs:DeleteMessage
+        - sqs:GetQueueAttributes
+        - sqs:SendMessage
+      Resource: "*" # Wildcard for all SQS queues
+    - Effect: Allow
+      Action:
+        - sns:Publish
+        - sns:Subscribe
+        - sns:Unsubscribe
+        - sns:SetTopicAttributes
+        - sns:CreateTopic
+        - sns:ListSubscriptionsByTopic
+      Resource: "*" # Wildcard for all SNS topics
+  role: arn:aws:iam::837919273423:role/LabRole
+  environment:
+    NODE_ENV: production
+
+plugins:
+  - serverless-plugin-typescript
+
+functions:
+  handleDailyData:
+    handler: src/handler.handler
+    events:
+      - schedule: cron(0 9 * * ? *)
+    timeout: 60
+  threeMonthDataDump:
+    handler: src/handler.handler
+    timeout: 60
+  generateAndSendBillData:
+    handler: src/handler.handler
+    events:
+      - schedule: 
+          rate: cron(15 5 4 * ? *)
+    timeout: 120
+  complaintConfirmationChecker:
+    handler: src/ComplaintConfirmationChecker.handler
+    timeout: 30 
+
+

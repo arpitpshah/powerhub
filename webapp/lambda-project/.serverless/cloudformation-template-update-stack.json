@@ -1,0 +1,359 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "The AWS CloudFormation template for this Serverless application",
+  "Resources": {
+    "ServerlessDeploymentBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "ServerlessDeploymentBucketPolicy": {
+      "Type": "AWS::S3::BucketPolicy",
+      "Properties": {
+        "Bucket": {
+          "Ref": "ServerlessDeploymentBucket"
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:*",
+              "Effect": "Deny",
+              "Principal": "*",
+              "Resource": [
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "ServerlessDeploymentBucket"
+                      },
+                      "/*"
+                    ]
+                  ]
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":s3:::",
+                      {
+                        "Ref": "ServerlessDeploymentBucket"
+                      }
+                    ]
+                  ]
+                }
+              ],
+              "Condition": {
+                "Bool": {
+                  "aws:SecureTransport": false
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "HandleDailyDataLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/PowerHub2-lambda-project-dev-handleDailyData"
+      }
+    },
+    "ThreeMonthDataDumpLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/PowerHub2-lambda-project-dev-threeMonthDataDump"
+      }
+    },
+    "GenerateAndSendBillDataLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/PowerHub2-lambda-project-dev-generateAndSendBillData"
+      }
+    },
+    "ComplaintConfirmationCheckerLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "Properties": {
+        "LogGroupName": "/aws/lambda/PowerHub2-lambda-project-dev-complaintConfirmationChecker"
+      }
+    },
+    "HandleDailyDataLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/PowerHub2-lambda-project/dev/1701666441692-2023-12-04T05:07:21.692Z/PowerHub2-lambda-project.zip"
+        },
+        "Handler": "src/handler.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "PowerHub2-lambda-project-dev-handleDailyData",
+        "MemorySize": 1024,
+        "Timeout": 60,
+        "Environment": {
+          "Variables": {
+            "NODE_ENV": "production"
+          }
+        },
+        "Role": "arn:aws:iam::837919273423:role/LabRole"
+      },
+      "DependsOn": [
+        "HandleDailyDataLogGroup"
+      ]
+    },
+    "ThreeMonthDataDumpLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/PowerHub2-lambda-project/dev/1701666441692-2023-12-04T05:07:21.692Z/PowerHub2-lambda-project.zip"
+        },
+        "Handler": "src/handler.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "PowerHub2-lambda-project-dev-threeMonthDataDump",
+        "MemorySize": 1024,
+        "Timeout": 60,
+        "Environment": {
+          "Variables": {
+            "NODE_ENV": "production"
+          }
+        },
+        "Role": "arn:aws:iam::837919273423:role/LabRole"
+      },
+      "DependsOn": [
+        "ThreeMonthDataDumpLogGroup"
+      ]
+    },
+    "GenerateAndSendBillDataLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/PowerHub2-lambda-project/dev/1701666441692-2023-12-04T05:07:21.692Z/PowerHub2-lambda-project.zip"
+        },
+        "Handler": "src/handler.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "PowerHub2-lambda-project-dev-generateAndSendBillData",
+        "MemorySize": 1024,
+        "Timeout": 120,
+        "Environment": {
+          "Variables": {
+            "NODE_ENV": "production"
+          }
+        },
+        "Role": "arn:aws:iam::837919273423:role/LabRole"
+      },
+      "DependsOn": [
+        "GenerateAndSendBillDataLogGroup"
+      ]
+    },
+    "ComplaintConfirmationCheckerLambdaFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "S3Bucket": {
+            "Ref": "ServerlessDeploymentBucket"
+          },
+          "S3Key": "serverless/PowerHub2-lambda-project/dev/1701666441692-2023-12-04T05:07:21.692Z/PowerHub2-lambda-project.zip"
+        },
+        "Handler": "src/ComplaintConfirmationChecker.handler",
+        "Runtime": "nodejs14.x",
+        "FunctionName": "PowerHub2-lambda-project-dev-complaintConfirmationChecker",
+        "MemorySize": 1024,
+        "Timeout": 30,
+        "Environment": {
+          "Variables": {
+            "NODE_ENV": "production"
+          }
+        },
+        "Role": "arn:aws:iam::837919273423:role/LabRole"
+      },
+      "DependsOn": [
+        "ComplaintConfirmationCheckerLogGroup"
+      ]
+    },
+    "HandleDailyDataLambdaVersion0EfjjzC7xJk5jiTXvdCjgnkwl7Et5qBjOlHv8k1va0k": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "HandleDailyDataLambdaFunction"
+        },
+        "CodeSha256": "V5yixYNdXGGEkLMDY6BzwkQYJyYC013pWnIOuLaBoaY="
+      }
+    },
+    "ThreeMonthDataDumpLambdaVersionEdJaNcfeVoJ5i6j4N7eohx6FT6yvQtPuM0jwDiIx6bQ": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "ThreeMonthDataDumpLambdaFunction"
+        },
+        "CodeSha256": "V5yixYNdXGGEkLMDY6BzwkQYJyYC013pWnIOuLaBoaY="
+      }
+    },
+    "GenerateAndSendBillDataLambdaVersionWuiPRYdYnw1DV9CqTy54Wry8C5Dx8oGi45Q4HCRZE": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "GenerateAndSendBillDataLambdaFunction"
+        },
+        "CodeSha256": "V5yixYNdXGGEkLMDY6BzwkQYJyYC013pWnIOuLaBoaY="
+      }
+    },
+    "ComplaintConfirmationCheckerLambdaVersion2xg1jGNdTFP2LlrSQhUj8w6U8mzALwqPUC6ozx2iI": {
+      "Type": "AWS::Lambda::Version",
+      "DeletionPolicy": "Retain",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "ComplaintConfirmationCheckerLambdaFunction"
+        },
+        "CodeSha256": "V5yixYNdXGGEkLMDY6BzwkQYJyYC013pWnIOuLaBoaY="
+      }
+    },
+    "HandleDailyDataEventsRuleSchedule1": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "ScheduleExpression": "cron(0 9 * * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "HandleDailyDataLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Id": "handleDailyDataSchedule"
+          }
+        ]
+      }
+    },
+    "HandleDailyDataLambdaPermissionEventsRuleSchedule1": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "HandleDailyDataLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "HandleDailyDataEventsRuleSchedule1",
+            "Arn"
+          ]
+        }
+      }
+    },
+    "GenerateAndSendBillDataEventsRuleSchedule1": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "ScheduleExpression": "cron(15 5 4 * ? *)",
+        "State": "ENABLED",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "GenerateAndSendBillDataLambdaFunction",
+                "Arn"
+              ]
+            },
+            "Id": "generateAndSendBillDataSchedule"
+          }
+        ]
+      }
+    },
+    "GenerateAndSendBillDataLambdaPermissionEventsRuleSchedule1": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": [
+            "GenerateAndSendBillDataLambdaFunction",
+            "Arn"
+          ]
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "GenerateAndSendBillDataEventsRuleSchedule1",
+            "Arn"
+          ]
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "ServerlessDeploymentBucketName": {
+      "Value": {
+        "Ref": "ServerlessDeploymentBucket"
+      },
+      "Export": {
+        "Name": "sls-PowerHub2-lambda-project-dev-ServerlessDeploymentBucketName"
+      }
+    },
+    "HandleDailyDataLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "HandleDailyDataLambdaVersion0EfjjzC7xJk5jiTXvdCjgnkwl7Et5qBjOlHv8k1va0k"
+      },
+      "Export": {
+        "Name": "sls-PowerHub2-lambda-project-dev-HandleDailyDataLambdaFunctionQualifiedArn"
+      }
+    },
+    "ThreeMonthDataDumpLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "ThreeMonthDataDumpLambdaVersionEdJaNcfeVoJ5i6j4N7eohx6FT6yvQtPuM0jwDiIx6bQ"
+      },
+      "Export": {
+        "Name": "sls-PowerHub2-lambda-project-dev-ThreeMonthDataDumpLambdaFunctionQualifiedArn"
+      }
+    },
+    "GenerateAndSendBillDataLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "GenerateAndSendBillDataLambdaVersionWuiPRYdYnw1DV9CqTy54Wry8C5Dx8oGi45Q4HCRZE"
+      },
+      "Export": {
+        "Name": "sls-PowerHub2-lambda-project-dev-GenerateAndSendBillDataLambdaFunctionQualifiedArn"
+      }
+    },
+    "ComplaintConfirmationCheckerLambdaFunctionQualifiedArn": {
+      "Description": "Current Lambda function version",
+      "Value": {
+        "Ref": "ComplaintConfirmationCheckerLambdaVersion2xg1jGNdTFP2LlrSQhUj8w6U8mzALwqPUC6ozx2iI"
+      },
+      "Export": {
+        "Name": "sls-PowerHub2-lambda-project-dev-ComplaintConfirmationCheckerLambdaFunctionQualifiedArn"
+      }
+    }
+  }
+}
